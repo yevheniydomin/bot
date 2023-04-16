@@ -34,3 +34,9 @@ typings/
 
 # google credentials
 google.credentials.json
+
+#database data
+data/
+*.db
+
+migrations/
