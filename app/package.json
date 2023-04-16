@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "set -a && source ../.env && npx nodemon index.js && set +a",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:migration": "set -a && source ../.env && npx sequelize db:migrate && set +a",
   },
   "author": "",
   "license": "ISC",
