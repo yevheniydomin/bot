@@ -37,6 +37,6 @@ google.credentials.json
 
 #database data
 data/
-*.db
+*.sqlite
 
 migrations/
