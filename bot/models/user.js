@@ -13,10 +13,6 @@ module.exports = db.define('user', {
     type: DataTypes.STRING,
     alowNull: false,
   },
-  chat_id: {
-    type: DataTypes.STRING,
-    alowNull: false,
-  },
   is_admin: {
     type: DataTypes.BOOLEAN,
     allowNull: true,

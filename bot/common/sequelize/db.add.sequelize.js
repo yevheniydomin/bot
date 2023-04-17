@@ -1,4 +1,4 @@
-const dbConnection = require('../../connections/db.connection');
+
 const db  = require('../../connections/db.connection');
 const User = require('../../models/user');
 
@@ -8,17 +8,17 @@ const saveUser = async function (args) {
     first_name, 
     last_name,
     username,
-    userId,
+    id,
   } = args;
 
   try {
-    await db.sync();
+    await db.sync({force:true});
 
     User.create({ 
       first_name, 
       last_name,
       username,
-      id: userId,
+      id,
     });
     return User;
   } catch (err) {
