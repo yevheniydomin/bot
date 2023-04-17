@@ -10,7 +10,7 @@ module.exports = bot.start(async (ctx) => {
       id,
     } = ctx.chat;
     
-    const result = await saveUser({first_name, last_name, username, userId: id});
+    const result = await saveUser({ first_name, last_name, username, id });
     console.log(result);
   } catch (err) {
     console.error('Error on start command\n', err);
