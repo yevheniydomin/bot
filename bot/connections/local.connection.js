@@ -1,2 +1,2 @@
 const { bot } = require('./token.connection');
-module.exports = bot.launch();
+module.exports = bot;

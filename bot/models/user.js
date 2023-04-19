@@ -23,6 +23,11 @@ module.exports = db.define('user', {
     allowNull: true,
     defaultValue: false,
   },
+  is_subscribed: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false
+  }
 },
 {
   timestamps: true,
