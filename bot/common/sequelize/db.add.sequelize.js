@@ -18,7 +18,7 @@ const saveUser = async function (args) {
     console.log('Got user from db: \n', JSON.stringify(currentUser));
     // Create a new user if not exists
     if(!currentUser) {
-      const newUser = await User.Create({ 
+      const newUser = await User.create({ 
         first_name, 
         last_name,
         username,
