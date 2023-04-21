@@ -1,6 +1,6 @@
 const { bot } = require("../../connections/token.connection");
 const dbSequelize  = require("../../common/sequelize/db.sequelize");
-const addNewUserToSpreadsheet = require("../../common/google/index");
+const google = require("../../common/google/index");
 const {
   Scenes: { Stage },
 } = require("telegraf");
@@ -10,7 +10,7 @@ module.exports = bot.start(async (ctx) => {
     const { first_name, last_name, username, id } = ctx.chat;
     await dbSequelize.addAdmin(process.env.BOT_INITIAL_ADMIN_ID);
 
-    const isAdmin = await dbSequelize.checkIfAdmin(id.toString());
+    const isAdmin = await dbSequelize.checkIfAdmin(id);
     if(isAdmin) {
       const buttons = await dbSequelize.adminView(ctx);
       await ctx.reply("Welcome admin!", buttons);
@@ -18,12 +18,14 @@ module.exports = bot.start(async (ctx) => {
     }
 
     if(!isAdmin) {
-      await addNewUserToSpreadsheet({
-        first_name,
-        last_name,
-        username,
-        id,
-      });
+      if(!await google.isUserInSpreadsheet(id)){
+        await google.addNewUserToSpreadsheet({
+          first_name,
+          last_name,
+          username,
+          id,
+        });
+      };
 
       const result = await dbSequelize.saveUser({
         first_name,
