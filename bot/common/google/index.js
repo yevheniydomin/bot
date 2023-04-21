@@ -15,7 +15,7 @@ const addNewUserToSpreadsheet = async function(args) {
       valueInputOption: 'USER_ENTERED',
       resource: {
         values: [
-          [id, first_name, last_name, username, date = moment().format('DD-MM-YYYY HH:MM')]
+          [id, first_name, last_name, username, date = moment().format('DD-MM-YYYY hh:mm')]
         ],
       },
     });
