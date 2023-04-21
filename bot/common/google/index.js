@@ -5,6 +5,8 @@ const moment = require('moment');
 const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 const tabTitle = process.env.GOOGLE_TAB_TITLE;
 
+
+// gets user model obj destructed object writes the data to a google spreadsheet
 const addNewUserToSpreadsheet = async function(args) {
   const { first_name, last_name, username, id } = args;
   try{
@@ -24,6 +26,7 @@ const addNewUserToSpreadsheet = async function(args) {
   }
 }
 
+// Checks by user id if user is already present in the spreadsheet. Returns true or false. 
 const isUserInSpreadsheet = async function(user_id) {
   try {
     const result = await googleSheets.spreadsheets.values.get({
