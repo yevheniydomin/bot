@@ -29,7 +29,7 @@ typings/
 .node_repl_history
 
 # dotenv environment variables file
-*.env
+.env
 .env.example
 
 # google credentials
@@ -40,3 +40,5 @@ data/
 *.sqlite
 
 migrations/
+
+google.credentials.json
