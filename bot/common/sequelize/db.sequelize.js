@@ -1,14 +1,12 @@
 require("dotenv").config();
 const db = require("../../connections/db.connection");
 const User = require("../../models/user");
-const { getUserByUserTelegramId, checkIfAdmin } = require("./db.get.sequelize");
+const Message = require('../../models/message')
 
 const saveUser = async function (args) {
   let { first_name, last_name, username, id } = args;
 
   try {
-    await db.sync({ force: true });
-
     let currentUser = await getUserByUserTelegramId(id);
     console.log("Got user from db: \n", JSON.stringify(currentUser));
     // Create a new user if not exists
@@ -54,7 +52,7 @@ const saveUser = async function (args) {
   } catch (err) {
     console.log("Error on adding a new user to db\n", err);
   }
-};
+}
 
 const addAdmin = async function (user_id) {
   try {
@@ -72,9 +70,45 @@ const addAdmin = async function (user_id) {
     console.error("Error on adding a new admin \n", err);
     return null;
   }
+}
+
+const createMessage = async function (args) {
+  Message.create({
+    id: '1',
+    title: 'The first message',
+    message: '`Привет ${first_name}! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy`'
+  })
+}
+
+const getUserByUserTelegramId = async function (user_id) {
+  try {
+    return await User.findOne({
+      where: {
+        user_id,
+      },
+    });
+  } catch (err) {
+    console.error("Error oh requesting a user from DB\n", err);
+  }
 };
 
-module.exports = {
+const checkIfAdmin = async function (user_id) {
+  try {
+    const user = await User.findOne({ where: { user_id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user.is_admin;
+  } catch (err) {
+    console.log("Error on getting admin by id from db\n", err);
+  }
+};
+const dbSequelize = {
   saveUser,
   addAdmin,
+  createMessage,
+  getUserByUserTelegramId,
+  checkIfAdmin,
 };
+
+module.exports = dbSequelize;

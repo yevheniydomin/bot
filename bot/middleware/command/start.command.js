@@ -2,9 +2,11 @@ const { bot } = require("../../connections/token.connection");
 const {
   saveUser,
   addAdmin,
-} = require("../../common/sequelize/db.add.sequelize");
-const { checkIfAdmin } = require("../../common/sequelize/db.get.sequelize");
-const manageGreetingMessage = require("../admin/scenes/manageGreetingMessage");
+  createMessage,
+  checkIfAdmin
+} = require("../../common/sequelize/db.sequelize");
+const manageGreetingMessage = require("../admin/scenes/AdminPanel");
+const adminView = require("../../common/views/admin.panel.view");
 const {
   Scenes: { Stage },
 } = require("telegraf");
@@ -12,17 +14,19 @@ const {
 module.exports = bot.start(async (ctx) => {
   try {
     const { first_name, last_name, username, id } = ctx.chat;
-
     await addAdmin(process.env.BOT_INITIAL_ADMIN_ID);
 
     const isAdmin = await checkIfAdmin(id.toString());
     if (isAdmin) {
-      await ctx.reply("Hi, Admin!");
-      bot.command('admin', Stage.enter("manageGreetingMessage"));
+      const buttons = await adminView(ctx);
+      await ctx.reply("Welcome admin!", buttons);
+      bot.on('callback_query', Stage.enter("AdminPanel"));
     }
 
     if (!isAdmin) {
       const result = await saveUser({ first_name, last_name, username, id });
+      const result2 = await createMessage();
+
       if (result) {
         console.log("Add user to a GS and send a greeating and subscribe");
       }

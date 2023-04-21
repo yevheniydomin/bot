@@ -2,7 +2,7 @@ const db  = require('../connections/db.connection');
 const { DataTypes } = require('sequelize');
 
 
-module.exports = db.define('message', {
+module.exports = db.define('Message', {
   id: {
     type: DataTypes.NUMBER,
     unique: true,
@@ -14,9 +14,6 @@ module.exports = db.define('message', {
   },
   message: {
     type: DataTypes.TEXT,
-  },
-  who_did_last_update: {
-    type: DataTypes.STRING
   },
   previous_version: {
     type: DataTypes.TEXT
