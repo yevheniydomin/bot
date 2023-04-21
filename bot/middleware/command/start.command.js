@@ -1,12 +1,6 @@
 const { bot } = require("../../connections/token.connection");
-const {
-  saveUser,
-  addAdmin,
-  createMessage,
-  checkIfAdmin
-} = require("../../common/sequelize/db.sequelize");
-const manageGreetingMessage = require("../admin/scenes/AdminPanel");
-const adminView = require("../../common/views/admin.panel.view");
+const dbSequelize  = require("../../common/sequelize/db.sequelize");
+const addNewUserToSpreadsheet = require("../../common/google/index");
 const {
   Scenes: { Stage },
 } = require("telegraf");
@@ -14,22 +8,32 @@ const {
 module.exports = bot.start(async (ctx) => {
   try {
     const { first_name, last_name, username, id } = ctx.chat;
-    await addAdmin(process.env.BOT_INITIAL_ADMIN_ID);
+    await dbSequelize.addAdmin(process.env.BOT_INITIAL_ADMIN_ID);
 
-    const isAdmin = await checkIfAdmin(id.toString());
-    if (isAdmin) {
-      const buttons = await adminView(ctx);
+    const isAdmin = await dbSequelize.checkIfAdmin(id.toString());
+    if(isAdmin) {
+      const buttons = await dbSequelize.adminView(ctx);
       await ctx.reply("Welcome admin!", buttons);
-      bot.on('callback_query', Stage.enter("AdminPanel"));
+      bot.on("callback_query", Stage.enter("AdminPanel"));
     }
 
-    if (!isAdmin) {
-      const result = await saveUser({ first_name, last_name, username, id });
-      const result2 = await createMessage();
+    if(!isAdmin) {
+      await addNewUserToSpreadsheet({
+        first_name,
+        last_name,
+        username,
+        id,
+      });
 
-      if (result) {
-        console.log("Add user to a GS and send a greeating and subscribe");
-      }
+      const result = await dbSequelize.saveUser({
+        first_name,
+        last_name,
+        username,
+        id,
+      });
+
+
+
     }
   } catch (err) {
     console.error("Error on start command\n", err);

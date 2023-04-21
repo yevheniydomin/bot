@@ -103,7 +103,7 @@ const checkIfAdmin = async function (user_id) {
     console.log("Error on getting admin by id from db\n", err);
   }
 };
-const dbSequelize = {
+module.exports = {
   saveUser,
   addAdmin,
   createMessage,
@@ -111,4 +111,3 @@ const dbSequelize = {
   checkIfAdmin,
 };
 
-module.exports = dbSequelize;
