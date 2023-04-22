@@ -15,7 +15,7 @@ const stage = require("./middleware/admin/stage/admin.stages");
 
 // SWITCH BOT ON/OFF
 
-const bot = require("../bot/connections/local.connection");
+const bot = require("./connections/local.connection");
 bot.use(session());
 bot.use(stage.middleware());
 

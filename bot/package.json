@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "set -a && source ../.env && npx nodemon ../index.js && set +a",
-    "db:migration": "set -a && source ../.env && npx sequelize db:migrate && set +a"
+    "dev": "set -a && source ./env/.env && npx nodemon ../index.js && set +a",
+    "db:migration": "set -a && source ./env/.env && npx sequelize db:migrate && set +a",
+    "start": "set -a && source ./env/.env && node ./index.js && set +a"
   },
   "author": "",
   "license": "ISC",
