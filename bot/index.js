@@ -3,14 +3,13 @@ require("./middleware/command/start.command");
 
 // DB CONNECTION
 const db = require("./connections/db.connection");
-db.sync({force:true}).then(() => {
-  console.log('DB has been synced');
+db.sync().then(() => {
+  console.log("DB has been synced");
 });
 
 // MIDDLEWARES & SESSION
 const { session } = require("telegraf");
 const stage = require("./middleware/admin/stage/admin.stages");
-
 
 const bot = require("./connections/local.connection");
 bot.use(session());
