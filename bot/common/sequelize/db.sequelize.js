@@ -72,11 +72,15 @@ const addAdmin = async function (user_id) {
 }
 
 const createMessage = async function (args) {
-  Message.create({
-    id: '2',
-    title: 'The greeting message',
-    message: 'Привет @username! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy'
-  });
+  try {
+    const { title, message } = args;
+    Message.create({
+      title,
+      message,
+    });
+  } catch(err) {
+    console.log('Error on adding a message to db\n', err);
+  }
 }
 
 const getUserByUserTelegramId = async function (user_id) {
