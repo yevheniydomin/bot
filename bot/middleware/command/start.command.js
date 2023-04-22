@@ -18,6 +18,9 @@ module.exports = bot.start(async (ctx) => {
     }
 
     if(!isAdmin) {
+      let message = await dbSequelize.getGreetingMessage();
+      message = message.split(' @username');
+      const newMessage = `${message[0]}, ${first_name}${message[1]}`; 
       if(!await google.isUserInSpreadsheet(id)){
         await google.addNewUserToSpreadsheet({
           first_name,
@@ -26,7 +29,6 @@ module.exports = bot.start(async (ctx) => {
           id,
         });
       };
-
       const result = await dbSequelize.saveUser({
         first_name,
         last_name,
@@ -34,8 +36,7 @@ module.exports = bot.start(async (ctx) => {
         id,
       });
 
-
-
+      await ctx.reply(newMessage);
     }
   } catch (err) {
     console.error("Error on start command\n", err);

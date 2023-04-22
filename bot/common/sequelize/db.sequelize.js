@@ -26,7 +26,7 @@ const saveUser = async function (args) {
       currentUser.last_name !== last_name ||
       currentUser.username !== username;
 
-    // updating user db if needed
+    // updating user in db if needed
     if (doNeedUpdateUser) {
       const newUser = User.update(
         {
@@ -40,8 +40,7 @@ const saveUser = async function (args) {
           },
         }
       );
-
-      //returning an updated user obj
+      //return an updated user obj
       return ({ currentUser } = {
         first_name,
         last_name,
@@ -74,10 +73,10 @@ const addAdmin = async function (user_id) {
 
 const createMessage = async function (args) {
   Message.create({
-    id: '1',
-    title: 'The first message',
-    message: '`Привет ${first_name}! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy`'
-  })
+    id: '2',
+    title: 'The greeting message',
+    message: 'Привет @username! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy'
+  });
 }
 
 const getUserByUserTelegramId = async function (user_id) {
@@ -103,11 +102,24 @@ const checkIfAdmin = async function (user_id) {
     console.log("Error on getting admin by id from db\n", err);
   }
 };
+
+const getGreetingMessage = async function () {
+  try {
+    const message = await Message.findOne({
+    order: [['createdAt', 'DESC']],
+  })
+  return message.message;
+  } catch(err) {
+    console.log('Error on getting message from DB\n', err);
+  }
+}
+
 module.exports = {
   saveUser,
   addAdmin,
   createMessage,
   getUserByUserTelegramId,
   checkIfAdmin,
+  getGreetingMessage
 };
 
