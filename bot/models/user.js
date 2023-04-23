@@ -1,6 +1,5 @@
-const db  = require('../connections/db.connection');
 const { DataTypes } = require('sequelize');
-
+const db = require('../connections/db.connection');
 
 module.exports = db.define('user', {
   user_id: {
@@ -9,19 +8,19 @@ module.exports = db.define('user', {
     allowNull: false
   },
   first_name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING
   },
   last_name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING
   },
   username: {
     type: DataTypes.STRING,
-    alowNull: false,
+    alowNull: false
   },
   is_admin: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue: false,
+    defaultValue: false
   },
   is_subscribed: {
     type: DataTypes.BOOLEAN,
@@ -32,5 +31,4 @@ module.exports = db.define('user', {
 {
   timestamps: true,
   updatedAt: false
-}
-);
+});

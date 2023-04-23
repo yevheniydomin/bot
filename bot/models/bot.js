@@ -1,14 +1,14 @@
-const db = require("../connections/db.connection");
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
+const db = require('../connections/db.connection');
 
 module.exports = db.define(
-  "bot",
+  'bot',
   {
     enabled: {
-      type: DataTypes.BOOLEAN,
-    },
+      type: DataTypes.BOOLEAN
+    }
   },
   {
-    updatedAt: true,
+    updatedAt: true
   }
 );

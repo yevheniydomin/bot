@@ -1,49 +1,51 @@
-const { bot } = require("../../connections/token.connection");
-const dbSequelize = require("../../common/sequelize/db.sequelize");
-const google = require("../../common/google/index");
 const {
-  Scenes: { Stage },
-} = require("telegraf");
+  Scenes: { Stage }
+} = require('telegraf');
+const { bot } = require('../../connections/token.connection');
+const dbSequelize = require('../../common/sequelize/db.sequelize');
+const google = require('../../common/google/index');
 
 module.exports = bot.start(async (ctx) => {
   try {
-    const { first_name, last_name, username, id } = ctx.chat;
+    const {
+      first_name, last_name, username, id
+    } = ctx.chat;
     await dbSequelize.addAdmin(process.env.BOT_INITIAL_ADMIN_ID);
 
     const isAdmin = await dbSequelize.checkIfAdmin(id);
     if (isAdmin) {
       const buttons = await dbSequelize.adminView(ctx);
-      await ctx.reply("Welcome admin!", buttons);
-      bot.on("callback_query", Stage.enter("AdminPanel"));
+      await ctx.reply('Welcome admin!', buttons);
+      bot.on('callback_query', Stage.enter('AdminPanel'));
     }
 
     if (!isAdmin) {
       await dbSequelize.createMessage({
-        title: "test",
+        title: 'test',
         message:
-          "Привет @username! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy",
+          'Привет @username! С тебя подписка! - https://t.me/+TwnP3Zh8DGA3ZTQy'
       });
       let message = await dbSequelize.getGreetingMessage();
-      message = message.split(" @username");
+      message = message.split(' @username');
       const newMessage = `${message[0]}, ${first_name}${message[1]}`;
       if (!(await google.isUserInSpreadsheet(id))) {
         await google.addNewUserToSpreadsheet({
           first_name,
           last_name,
           username,
-          id,
+          id
         });
       }
       const result = await dbSequelize.saveUser({
         first_name,
         last_name,
         username,
-        id,
+        id
       });
 
       await ctx.reply(newMessage);
     }
   } catch (err) {
-    console.error("Error on start command\n", err);
+    console.error('Error on start command\n', err);
   }
 });

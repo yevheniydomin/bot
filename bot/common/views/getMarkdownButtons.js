@@ -11,22 +11,24 @@ const getButtonsMarkdown = async function (
   sufix = ''
 ) {
   const buttons = [];
-  let buttonsLinesCount = await parseInt(array.length / columsNumber);
-  if (array.length % columsNumber) buttonsLinesCount++;
+  let buttonsLinesCount = parseInt(array.length / columsNumber, 10);
+  if (array.length % columsNumber) buttonsLinesCount += 1;
 
-  for (let i = 0; i < buttonsLinesCount; i++) {
+  for (let i = 0; i < buttonsLinesCount; i += 1) {
     buttons.push([]);
   }
 
   let countLine = 0;
-  for (let i = 0; i < array.length; i++) {
+  for (let i = 0; i < array.length; i += 1) {
     buttons[countLine].push(
       Markup.button.callback(array[i][textProp], `${sufix}${array[i][callbackIdProp]}`)
     );
     if (buttons[countLine].length === columsNumber) {
-      countLine++;
+      countLine += 1;
     }
   }
 
   return buttons;
 };
+
+module.exports = getButtonsMarkdown;

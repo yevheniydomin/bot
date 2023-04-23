@@ -35,10 +35,12 @@ typings/
 # google credentials
 google.credentials.json
 
-#database data
+# database data
 data/
 *.sqlite
-
 migrations/
-
 google.credentials.json
+
+# vscode
+.vscode
+
