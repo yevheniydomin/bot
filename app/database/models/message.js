@@ -1,10 +1,7 @@
 const { DataTypes } = require('sequelize');
-const db = require('../connections/db.connection');
+const db = require('../connection');
 
 module.exports = db.define('Message', {
-  title: {
-    type: DataTypes.STRING
-  },
   message: {
     type: DataTypes.TEXT
   }

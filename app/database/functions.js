@@ -1,5 +1,6 @@
 require('dotenv').config();
 const User = require('./models/user');
+const Message = require('./models/message');
 
 const saveUser = async function (args) {
   const {
@@ -41,28 +42,26 @@ const saveUser = async function (args) {
   return 0;
 };
 
-const addAdmin = async function (user_id) {
-  try {
-    const user = await User.findOrCreate({
-      where: {
-        user_id
-      },
-      defaults: {
-        first_name: 'Admin'
-      }
-    });
-    await User.update({ is_admin: true }, { where: { user_id } });
-    return user;
-  } catch (err) {
-    return err;
-  }
-};
+// const addAdmin = async function (user_id) {
+//   try {
+//     const user = await User.findOrCreate({
+//       where: {
+//         user_id
+//       },
+//       defaults: {
+//         first_name: 'Admin'
+//       }
+//     });
+//     await User.update({ is_admin: true }, { where: { user_id } });
+//     return user;
+//   } catch (err) {
+//     return err;
+//   }
+// };
 
-const createMessage = async function (args) {
+const createMessage = async function (message) {
   try {
-    const { title, message } = args;
     return await Message.create({
-      title,
       message
     });
   } catch (err) {
@@ -105,11 +104,28 @@ const getGreetingMessage = async function () {
   }
 };
 
+const checkIfGreetingExists = async function () {
+  return await Message.findOne();
+}
+
+const updateGreetingMessage = async function (message) {
+  try {
+   await Message.update(
+      { message },
+      { where: { id: 1 } },
+    )
+  } catch(err) {
+    console.log('Error on updating greeting in db', err);
+  }
+  return 0;
+}
+
 module.exports = {
   saveUser,
-  addAdmin,
   createMessage,
   getUserByUserTelegramId,
   checkIfAdmin,
-  getGreetingMessage
+  getGreetingMessage,
+  checkIfGreetingExists,
+  updateGreetingMessage
 };
