@@ -43,3 +43,6 @@ google.credentials.json
 # vscode
 .vscode
 
+# Images
+.png
+.jpeg
