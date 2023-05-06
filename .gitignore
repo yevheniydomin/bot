@@ -44,5 +44,5 @@ google.credentials.json
 .vscode
 
 # Images
-.png
-.jpeg
+*.png
+*.jpeg

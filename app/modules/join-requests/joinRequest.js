@@ -23,7 +23,7 @@ composer.on('chat_join_request', async (ctx) => {
   });
   await ctx.approveChatJoinRequest(id);
   await addNewUserToSpreadsheet({id, first_name, last_name, username });
-  await bot.telegram.sendMessage(id, 'Hello!');
+  await bot.telegram.sendMessage(id, `Hello ${first_name}!`);
 });
 
 module.exports = composer;
