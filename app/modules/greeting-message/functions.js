@@ -1,38 +1,55 @@
 const fs = require('node:fs');
 const fetch = require('node-fetch');
 const Message = require('../../database/models/message');
-const dbFunc  = require('../../database/functions');
+const dbFunc = require('../../database/functions');
 
 saveNewPicForGreetMessage = async function (ctx) {
   try {
-    let fieldId;
-    if (!ctx.update.message.photo && !ctx.update.message.document) {
-      console.log(ctx.update.message);
-      await ctx.reply('INFO: any picture in the new greeting message.');
+    let field_id;
+    const pathToMarkdownEntities = '../data/greeting-message/markdownEntities.json';
+    const exists = fs.existsSync(pathToMarkdownEntities);
+    if(exists) {
+      fs.unlinkSync(pathToMarkdownEntities);
+      console.log('Previous greeting entities has been removed');
+    }
+
+    if (ctx.update.message.document) {
+      ctx.reply('Please attach picture as a photo not as a file.');
       return 1;
     }
-    if (ctx.update.message.photo) {
-      console.log(ctx.update.message.photo);
-      const indxOfTheBestPhotoQuality = ctx.update.message.photo.length - 1;
-      fileId = ctx.update.message.photo[indxOfTheBestPhotoQuality].file_id;
-    } else {
-      fileId = ctx.update.message.document.file_id;
+    if (!ctx.update.message.photo) {
+      const message = ctx.update.message.text;
+      await ctx.reply('Please note that there are not any pictures in the new greeting message.');
+      await dbFunc.updateGreetingMessage({ message, file_id: null });
+      fs.writeFileSync(pathToMarkdownEntities, JSON.stringify(ctx.update.message.entities));
+      await ctx.reply('Greeting has been updated.');
+      return 0;
     }
-    ctx.telegram.getFileLink(fileId).then((url) => {
-      const imgPath = '../data/greeting-img/image.png';
-      const exists = fs.existsSync(imgPath);
-      if (exists) {
-        console.log('The image already exists.');
-        fs.unlinkSync(imgPath);
-        console.log('Previous image has been removed');
-      }
-      fetch(url).then((response) => {
-        response.body.pipe(fs.createWriteStream(imgPath));
-        ctx.reply('New imgage for greeting message has been saved');
-      });
-    });
+    if (ctx.update.message.photo) {
+      file_id = ctx.update.message.photo[0].file_id;
+      const caption = ctx.update.message.caption;
+      await dbFunc.updateGreetingMessage({ message: caption, file_id });
+      fs.writeFileSync(pathToMarkdownEntities, JSON.stringify(ctx.update.message.caption_entities));
+      ctx.reply('Greeting has been updated');
+      return 0;
+    }
+
+    // ctx.telegram.getFileLink(fileId).then((url) => {
+    //   const imgPath = '../data/greeting-message/image.png';
+    //   const exists = fs.existsSync(imgPath);
+    //   if (exists) {
+    //     console.log('The image already exists.');
+    //     fs.unlinkSync(imgPath);
+    //     console.log('Previous image has been removed');
+    //   }
+    //   fetch(url).then((response) => {
+    //     response.body.pipe(fs.createWriteStream(imgPath));
+    //     ctx.reply('New imgage for greeting message has been saved');
+    //   });
+    // });
   } catch (err) {
-    console.log('Error on image fetch\n', err);
+    console.log('Error on updating the greeting\n', err);
+    ctx.reply(`Error on updating the greeting\n ${err}`);
   }
   return 0;
 };
@@ -40,7 +57,7 @@ saveNewPicForGreetMessage = async function (ctx) {
 saveNewMessageText = async function (ctx) {
   try {
     let message;
-    if(!ctx.update.message.photo && !ctx.update.message.document){
+    if (!ctx.update.message.photo && !ctx.update.message.document) {
       message = ctx.update.message.text;
     } else {
       message = ctx.update.message.caption;

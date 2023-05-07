@@ -3,9 +3,7 @@ const User = require('./models/user');
 const Message = require('./models/message');
 
 const saveUser = async function (args) {
-  const {
-    first_name, last_name, username, id
-  } = args;
+  const { first_name, last_name, username, id } = args;
 
   try {
     let currentUser = await getUserByUserTelegramId(id);
@@ -15,7 +13,7 @@ const saveUser = async function (args) {
         first_name,
         last_name,
         username,
-        user_id: id
+        user_id: id,
       });
       return newUser;
     }
@@ -33,7 +31,7 @@ const saveUser = async function (args) {
         first_name,
         last_name,
         username,
-        user_id: id
+        user_id: id,
       });
     }
   } catch (err) {
@@ -59,22 +57,23 @@ const saveUser = async function (args) {
 //   }
 // };
 
-const createMessage = async function (message) {
-  try {
-    return await Message.create({
-      message
-    });
-  } catch (err) {
-    return err;
-  }
-};
+// const createMessage = async function ({ message, file_id }) {
+//   try {
+//     return await Message.create({
+//       message,
+//       file_id,
+//     });
+//   } catch (err) {
+//     console.log('Error on creating a new greeting in db');
+//   }
+// };
 
 const getUserByUserTelegramId = async function (user_id) {
   try {
     return await User.findOne({
       where: {
-        user_id
-      }
+        user_id,
+      },
     });
   } catch (err) {
     return err;
@@ -95,10 +94,9 @@ const checkIfAdmin = async function (user_id) {
 
 const getGreetingMessage = async function () {
   try {
-    const message = await Message.findOne({
-      order: [['createdAt', 'DESC']]
+     return await Message.findOne({
+      where: { id: 1 },
     });
-    return message.message;
   } catch (err) {
     return err;
   }
@@ -106,26 +104,29 @@ const getGreetingMessage = async function () {
 
 const checkIfGreetingExists = async function () {
   return await Message.findOne();
-}
+};
 
-const updateGreetingMessage = async function (message) {
+const updateGreetingMessage = async function ({ message, file_id}) {
   try {
-   await Message.update(
-      { message },
-      { where: { id: 1 } },
-    )
-  } catch(err) {
+    if(await Message.findOne()){
+      return await Message.update({ message, file_id }, { where: { id: 1 } });
+    } else {
+      return await Message.create({
+        message,
+        file_id,
+      });
+    }
+  } catch (err) {
     console.log('Error on updating greeting in db', err);
   }
   return 0;
-}
+};
 
 module.exports = {
   saveUser,
-  createMessage,
   getUserByUserTelegramId,
   checkIfAdmin,
   getGreetingMessage,
   checkIfGreetingExists,
-  updateGreetingMessage
+  updateGreetingMessage,
 };
