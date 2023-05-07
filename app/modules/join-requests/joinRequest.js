@@ -3,6 +3,8 @@ const { saveUser } = require('../../database/functions');
 const { addNewUserToSpreadsheet } = require('../../google/functions');
 const { Composer } = require('telegraf');
 const bot = require('../../botConnection');
+const dbFunc = require('../../database/functions');
+const { sendGreeingMessage } = require('../greeting-message/functions')
 
 const composer = new Composer();
 
@@ -23,7 +25,7 @@ composer.on('chat_join_request', async (ctx) => {
   });
   await ctx.approveChatJoinRequest(id);
   await addNewUserToSpreadsheet({id, first_name, last_name, username });
-  await bot.telegram.sendMessage(id, `Hello ${first_name}!`);
+  sendGreeingMessage(ctx);
 });
 
 module.exports = composer;
