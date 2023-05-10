@@ -12,11 +12,14 @@ if (!fs.existsSync(process.env.DATABASE_STORAGE)) {
 }
 
 const joinRequestsHandler = require('./modules/join-requests/joinRequest');
+const menuComposer = require('./modules/admin/menuComposer');
+const { mainMenuKeyboard } = require('./modules/admin/keybordsView')
+bot.start((ctx) => {
+  ctx.reply('Привіт Адмін!', mainMenuKeyboard);
+})
 bot.use(joinRequestsHandler);
-bot.on('message', async (ctx) => {
-  await saveNewGreetingMessage(ctx);
-  await sendCurrentGreeting(ctx);
-});
+bot.use(menuComposer.middleware());
+
 bot.launch();
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
