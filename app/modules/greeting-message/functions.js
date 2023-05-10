@@ -1,27 +1,22 @@
 const fs = require('node:fs');
 const dbFunc = require('../../database/functions');
-const { StringDecoder } = require('node:string_decoder');
 
 saveNewGreetingMessage = async function (ctx) {
   try {
     let field_id;
-    const pathToMarkdownEntities = '../data/greeting-message/markdownEntities.json';
-    const pathToCachedMessage = '../data/greeting-message/cahcedMessage.json';
-    const pathToCachedPictureId = '../data/greeting-message/pictureId.json';
-    const isEntititesExisting = fs.existsSync(pathToMarkdownEntities);
-    const isCachedMEssageExisting = fs.existsSync(pathToCachedMessage);
+    const pathToCachedMessage = '../data/greeting-message/cahcedMessage.txt';
+    const pathToCachedPictureId = '../data/greeting-message/pictureId.txt';
+    const isCachedMessageExisting = fs.existsSync(pathToCachedMessage);
     const isCachedPicIdExisting = fs.existsSync(pathToCachedPictureId);
 
-    if (isEntititesExisting) {
-      fs.unlinkSync(pathToMarkdownEntities);
-      console.log('Previous greeting entities has been removed');
-    }
-    if (isCachedMEssageExisting) {
+    if (isCachedMessageExisting) {
       fs.unlinkSync(pathToCachedMessage);
-      console.log('Old message cache has been cleaned');
+      ctx.reply('An old message has been removed');
+      console.log('An old message has been removed');
     }
     if (isCachedPicIdExisting) {
       fs.unlinkSync(pathToCachedPictureId);
+      ctx.reply('An old picture has been removed');
       console.log('Picture ID cache has been cleaned');
     }
     if (ctx.update.message.document) {
@@ -29,29 +24,16 @@ saveNewGreetingMessage = async function (ctx) {
       return 1;
     }
     if (!ctx.update.message.photo) {
-      const message = ctx.update.message.text;
-      await ctx.reply('Please note that there are not any pictures in the new greeting message.');
-      await dbFunc.updateGreetingMessage({ message, file_id: null });
-      if (ctx.update.message.entities) {
-        fs.writeFileSync(pathToMarkdownEntities, JSON.stringify(ctx.update.message.entities));
-      }
-      fs.writeFileSync(pathToCachedMessage, `{"message": "${message}"}`);
-      await ctx.reply('Greeting has been updated.');
-      return 0;
+      await ctx.reply('Please attach a picture as a photo');
+      return 1;
     }
     if (ctx.update.message.photo) {
       file_id = ctx.update.message.photo[0].file_id;
-      fs.writeFileSync(pathToCachedPictureId, `{"file_id": "${file_id}"}`);
+      fs.writeFileSync(pathToCachedPictureId, file_id);
       const caption = ctx.update.message.caption;
       await dbFunc.updateGreetingMessage({ message: caption, file_id });
-      if (ctx.update.message.caption_entities) {
-        fs.writeFileSync(
-          pathToMarkdownEntities,
-          JSON.stringify(ctx.update.message.caption_entities)
-        );
-      }
-      fs.writeFileSync(pathToCachedMessage, `{"message": "${caption}"}`);
-      ctx.reply('Greeting has been updated');
+      fs.writeFileSync(pathToCachedMessage, caption);
+      ctx.reply('The new greeting has been set.');
       return 0;
     }
   } catch (err) {
@@ -92,27 +74,27 @@ applyEntitiesToPlainText = function (text, entities) {
   const markdown = {
     bold: { left: '*', right: '*', lengthIncresed: 4 },
     italic: { left: '_', right: '_', lengthIncresed: 4 },
-    text_link: {left: '', right: '', lengthIncresed: 0 },
-  }
+    text_link: { left: '', right: '', lengthIncresed: 0 },
+  };
   let shift = 0;
-  for(let i = 0; i < entities.length; i++) {
+  for (let i = 0; i < entities.length; i++) {
     let splitText = text.split('');
     console.log('Slit text on a loop start\n', splitText);
     const firstIndx = entities[i].offset + shift;
     const secodIndx = firstIndx + entities[i].length;
     let left;
     let right;
-    if(entities[i].type === 'text_link') {
+    if (entities[i].type === 'text_link') {
       markdown[entities[i].type].left = '[';
       markdown[entities[i].type].right = `](${entities[i].url})`;
       markdown[entities[i].type].lengthIncresed = 4 + entities[i].url.length;
     }
-    if(entities[i].type === 'mention') {
+    if (entities[i].type === 'mention') {
       break;
     }
     left = markdown[entities[i].type].left;
     right = markdown[entities[i].type].right;
-    
+
     let sliceArr = text.slice(firstIndx, secodIndx).split('');
     sliceArr.unshift(left);
     sliceArr.push(right);
@@ -125,8 +107,31 @@ applyEntitiesToPlainText = function (text, entities) {
   return text;
 };
 
+sendCurrentGreeting = async function (ctx) {
+  const chat_id = ctx.update.message.from.id;
+  if(!fs.existsSync('../data/greeting-message/cahcedMessage.txt')) {
+    console.log('Greeting message does not exist. Please set the message firstly');
+    return 1;
+  }
+  
+  try {
+    const bufferMessage = fs.readFileSync('../data/greeting-message/cahcedMessage.txt');
+    const message = await bufferMessage.toString('utf8');
+    const bufferPicture = await fs.readFileSync('../data/greeting-message/pictureId.txt');
+    const file_id = bufferPicture.toString('utf8');
+    await ctx.sendPhoto(file_id, {
+      chat_id,
+      caption: message,
+      parse_mode: 'MarkdownV2',
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 module.exports = {
   saveNewGreetingMessage,
   sendGreeingMessage,
-  applyEntitiesToPlainText
+  applyEntitiesToPlainText,
+  sendCurrentGreeting
 };
