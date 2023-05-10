@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const dbFunc = require('../../database/functions');
+const { StringDecoder } = require('node:string_decoder');
 
 saveNewGreetingMessage = async function (ctx) {
   try {
@@ -68,12 +69,13 @@ sendGreeingMessage = async function (ctx) {
   const isCachedMEssageExisting = fs.existsSync(pathToCachedMessage);
   const isCachedPicIdExisting = fs.existsSync(pathToCachedPictureId);
   try {
-    const chat_id = ctx.update.chat_join_request.user_chat_id;
-    if(isEntititesExisting && isCachedMEssageExisting && isCachedPicIdExisting) {
-      const caption = await dbFunc.getGreetingMessage();
-      console.log(caption, '\n\n');
+    const chat_id = 181703780; //ctx.update.chat_join_request.user_chat_id;
+    if (isEntititesExisting && isCachedMEssageExisting && isCachedPicIdExisting) {
+      let caption = await dbFunc.getGreetingMessage();
+      // const decoder = new StringDecoder('utf8');
+      // const cent = await Buffer.from([caption.message]);
+      // caption.message = await decoder.write(cent);
       const caption_entities = require('../../../data/greeting-message/markdownEntities.json');
-      console.log(caption_entities, '\n\n');
       const fileId = require('../../../data/greeting-message/pictureId.json');
       await ctx.sendPhoto(fileId.file_id, {
         chat_id,
@@ -86,7 +88,45 @@ sendGreeingMessage = async function (ctx) {
   }
 };
 
+applyEntitiesToPlainText = function (text, entities) {
+  const markdown = {
+    bold: { left: '*', right: '*', lengthIncresed: 4 },
+    italic: { left: '_', right: '_', lengthIncresed: 4 },
+    text_link: {left: '', right: '', lengthIncresed: 0 },
+  }
+  let shift = 0;
+  for(let i = 0; i < entities.length; i++) {
+    let splitText = text.split('');
+    console.log('Slit text on a loop start\n', splitText);
+    const firstIndx = entities[i].offset + shift;
+    const secodIndx = firstIndx + entities[i].length;
+    let left;
+    let right;
+    if(entities[i].type === 'text_link') {
+      markdown[entities[i].type].left = '[';
+      markdown[entities[i].type].right = `](${entities[i].url})`;
+      markdown[entities[i].type].lengthIncresed = 4 + entities[i].url.length;
+    }
+    if(entities[i].type === 'mention') {
+      break;
+    }
+    left = markdown[entities[i].type].left;
+    right = markdown[entities[i].type].right;
+    
+    let sliceArr = text.slice(firstIndx, secodIndx).split('');
+    sliceArr.unshift(left);
+    sliceArr.push(right);
+    const newStr = sliceArr.join('');
+    splitText.splice(firstIndx, entities[i].length, newStr);
+    shift += markdown[entities[i].type].lengthIncresed;
+    text = splitText.join('');
+  }
+  // fs.writeFileSync('../data/greeting-message/text2.txt', text);
+  return text;
+};
+
 module.exports = {
   saveNewGreetingMessage,
-  sendGreeingMessage
+  sendGreeingMessage,
+  applyEntitiesToPlainText
 };

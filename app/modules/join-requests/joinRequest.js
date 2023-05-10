@@ -9,7 +9,6 @@ const { sendGreeingMessage } = require('../greeting-message/functions')
 const composer = new Composer();
 
 composer.on('chat_join_request', async (ctx) => {
-  console.log(ctx.update.chat_join_request);
   const update = ctx.update.chat_join_request;
   const { id, username, first_name, last_name, is_bot } = update.from
 
