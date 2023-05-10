@@ -1,25 +1,21 @@
 require('dotenv').config();
 const bot = require('./botConnection');
 const db = require('./database/connection');
-const { saveNewGreetingMessage, sendCurrentGreeting } = require('./modules/greeting-message/functions');
-const dbFunc  = require('./database/functions');
 const fs = require('node:fs');
 
+if (!fs.existsSync(process.env.DATABASE_STORAGE)) {
+  console.log('DB does not exist. Creating a new one...');
+  db.sync({ force: true });
+} else {
+  console.log('DB exist');
+  db.sync();
+}
 
-db.sync();
 const joinRequestsHandler = require('./modules/join-requests/joinRequest');
 bot.use(joinRequestsHandler);
 bot.on('message', async (ctx) => {
   await saveNewGreetingMessage(ctx);
-  //const caption_entities = await require('../data/greeting-message/markdownEntities.json');
-  //const buffer = fs.readFileSync('../data/greeting-message/test.txt');
-  //const message = buffer.toString('utf8');
   await sendCurrentGreeting(ctx);
-  //const rawTextMEssage = await applyEntitiesToPlainText(greeting.message, caption_entities);
-  //console.log('MESSAGE AFTER PARSER: \n', rawTextMEssage);
-  // console.log(buffer);
-
-  
 });
 bot.launch();
 

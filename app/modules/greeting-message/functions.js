@@ -108,7 +108,7 @@ applyEntitiesToPlainText = function (text, entities) {
 };
 
 sendCurrentGreeting = async function (ctx) {
-  const chat_id = ctx.update.message.from.id;
+  const chat_id = ctx.update.chat_join_request.from.id;
   if(!fs.existsSync('../data/greeting-message/cahcedMessage.txt')) {
     console.log('Greeting message does not exist. Please set the message firstly');
     return 1;
@@ -124,14 +124,23 @@ sendCurrentGreeting = async function (ctx) {
       caption: message,
       parse_mode: 'MarkdownV2',
     });
+    console.log(`New greating has been sent to\nUser ID: ${chat_id}\nFirst name: ${ctx.update.chat_join_request.from.first_name}\nUsername: ${ctx.update.chat_join_request.from.username}`);
+    return 0;
   } catch (err) {
     console.log(err);
   }
 };
 
+isGreetingReady = async function () {
+    fs.existsSync('../data/greeting-message/cahcedMessage.txt') &&
+    fs.existsSync('../data/greeting-message/pictureId.txt') ? true : false;
+  
+}
+
 module.exports = {
   saveNewGreetingMessage,
   sendGreeingMessage,
   applyEntitiesToPlainText,
-  sendCurrentGreeting
+  sendCurrentGreeting,
+  isGreetingReady
 };
