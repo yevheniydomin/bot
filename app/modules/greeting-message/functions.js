@@ -1,6 +1,17 @@
 const fs = require('node:fs');
 const dbFunc = require('../../database/functions');
 
+
+escapeSpecialSymbols = function(message) {
+  //'_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'  
+  return message
+    .replaceAll('.', '\\.')
+    .replaceAll('!', '\\!')
+    .replaceAll(',', '\\,')
+    .replaceAll('|', '\\|')
+    .replaceAll('#', '\\#')
+}
+
 saveNewGreetingMessage = async function (ctx) {
   try {
     let field_id;
@@ -11,34 +22,38 @@ saveNewGreetingMessage = async function (ctx) {
 
     if (isCachedMessageExisting) {
       fs.unlinkSync(pathToCachedMessage);
-      ctx.reply('An old message has been removed');
       console.log('An old message has been removed');
     }
     if (isCachedPicIdExisting) {
       fs.unlinkSync(pathToCachedPictureId);
-      ctx.reply('An old picture has been removed');
       console.log('Picture ID cache has been cleaned');
     }
     if (ctx.update.message.document) {
-      ctx.reply('Please attach picture as a photo not as a file.');
+      ctx.reply('Будь ласка прикрепи картинку як фото ф не як файл');
       return 1;
     }
     if (!ctx.update.message.photo) {
-      await ctx.reply('Please attach a picture as a photo');
+      await ctx.reply('Будь ласка прикрепи ще картинку');
+      return 1;
+    }
+    if(!ctx.update.message.caption){
+      ctx.reply('А де саме повідомленя, га? Без тексту неможна.');
       return 1;
     }
     if (ctx.update.message.photo) {
       file_id = ctx.update.message.photo[0].file_id;
       fs.writeFileSync(pathToCachedPictureId, file_id);
       const caption = ctx.update.message.caption;
-      await dbFunc.updateGreetingMessage({ message: caption, file_id });
-      fs.writeFileSync(pathToCachedMessage, caption);
-      ctx.reply('The new greeting has been set.');
+      const escapedCaption = await escapeSpecialSymbols(caption);
+      console.log(escapedCaption);
+      await dbFunc.updateGreetingMessage({ message: escapedCaption, file_id });
+      fs.writeFileSync(pathToCachedMessage, escapedCaption);
+      ctx.reply('Нове привітання було успішно встановлене');
       return 0;
     }
   } catch (err) {
     console.log('Error on updating the greeting\n', err);
-    ctx.reply(`Error on updating the greeting\n ${err}`);
+    ctx.reply(`Помилка при оновлені привітання\n ${err}`);
   }
   return 0;
 };
@@ -108,7 +123,6 @@ saveNewGreetingMessage = async function (ctx) {
 // };
 
 sendCurrentGreeting = async function (ctx) {
-  await console.log('WOW:\n',ctx.update.message);
   let chat_id = undefined;
   try {
     chat_id = ctx.update.chat_join_request.from.id
@@ -124,7 +138,7 @@ sendCurrentGreeting = async function (ctx) {
   }
    
   if(!fs.existsSync('../data/greeting-message/cahcedMessage.txt')) {
-    console.log('Greeting message does not exist. Please set the message firstly');
+    ctx.reply('Привітання поки що відсутнє');
     return 1;
   }
   
@@ -155,5 +169,6 @@ isGreetingReady = async function () {
 module.exports = {
   saveNewGreetingMessage,
   sendCurrentGreeting,
-  isGreetingReady
+  isGreetingReady,
+  escapeSpecialSymbols
 };
