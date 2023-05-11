@@ -17,13 +17,18 @@ saveNewGreetingMessage = async function (ctx) {
     let field_id;
     const pathToCachedMessage = '../data/greeting-message/cahcedMessage.txt';
     const pathToCachedPictureId = '../data/greeting-message/pictureId.txt';
+    const pathToGreetFolder = '../data/greeting-message';
     const isCachedMessageExisting = fs.existsSync(pathToCachedMessage);
     const isCachedPicIdExisting = fs.existsSync(pathToCachedPictureId);
+    const isGreetingFolderExisting = fs.existsSync(pathToGreetFolder);
 
+    if(!isGreetingFolderExisting) {
+      fs.mkdirSync(pathToGreetFolder);
+    }
     if (isCachedMessageExisting) {
       fs.unlinkSync(pathToCachedMessage);
       console.log('An old message has been removed');
-    }
+    } 
     if (isCachedPicIdExisting) {
       fs.unlinkSync(pathToCachedPictureId);
       console.log('Picture ID cache has been cleaned');
