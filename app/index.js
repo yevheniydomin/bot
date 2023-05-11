@@ -14,8 +14,18 @@ if (!fs.existsSync(process.env.DATABASE_STORAGE)) {
 const joinRequestsHandler = require('./modules/join-requests/joinRequest');
 const menuComposer = require('./modules/admin/menuComposer');
 const { mainMenuKeyboard } = require('./modules/admin/keybordsView')
-bot.start((ctx) => {
-  ctx.reply('Привіт Адмін!', mainMenuKeyboard);
+bot.start(async (ctx) => {
+  const chatId = process.env.CHANNEL_ID;
+  const userId = ctx.message.from.id;
+  const chatMember = await ctx.telegram.getChatMember(chatId, userId);
+  const isAdmin = chatMember.status === 'administrator' || chatMember.status === 'creator';
+
+  if(isAdmin){
+    ctx.reply('Привіт Адмін!', mainMenuKeyboard);
+  }
+  else {
+    ctx.reply('Дякую що підписався на нащі оновлення!');
+  }
 })
 bot.use(joinRequestsHandler);
 bot.use(menuComposer.middleware());
